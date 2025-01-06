@@ -28,6 +28,7 @@ import os
 def init_es():
     return Elasticsearch(
         "https://elasticsearch-190121-0.cloudclusters.net:10074",
+        headers={"Content-Type": "application/json"},
         http_auth=("elastic", "l4EeFEfQ"),
         ca_certs="ca_certificate.pem",
         verify_certs=True
