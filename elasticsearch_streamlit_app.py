@@ -9,17 +9,26 @@ username = os.getenv("ES_USERNAME")
 password = os.getenv("ES_PASSWORD")
 connection_url = os.getenv("ES_URL")
 
-ca_cert = os.getenv("CERTIFICATE")
-# Write the certificate to a temporary file
-with open("ca_certificate.pem", "w") as cert_file:
-    cert_file.write(ca_cert)
+# ca_cert = os.getenv("CERTIFICATE")
+# # Write the certificate to a temporary file
+# with open("ca_certificate.pem", "w") as cert_file:
+#     cert_file.write(ca_cert)
 
 # Initialize Elasticsearch client
+# @st.cache_resource
+# def init_es():
+#     return Elasticsearch(
+#         connection_url,
+#         http_auth=(username, password),
+#         ca_certs="ca_certificate.pem",
+#         verify_certs=True
+#     )
+
 @st.cache_resource
 def init_es():
     return Elasticsearch(
-        connection_url,
-        http_auth=(username, password),
+        "https://elasticsearch-190121-0.cloudclusters.net:10074",
+        http_auth=("elastic", "l4EeFEfQ"),
         ca_certs="ca_certificate.pem",
         verify_certs=True
     )
