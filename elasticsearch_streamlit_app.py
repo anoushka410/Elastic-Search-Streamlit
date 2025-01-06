@@ -5,9 +5,9 @@ import os
 
 
 # Access Environment Variables from Streamlit Cloud
-username = os.getenv("ES_USERNAME")
-password = os.getenv("ES_PASSWORD")
-connection_url = os.getenv("ES_URL")
+# username = os.getenv("ES_USERNAME")
+# password = os.getenv("ES_PASSWORD")
+# connection_url = os.getenv("ES_URL")
 
 # ca_cert = os.getenv("CERTIFICATE")
 # # Write the certificate to a temporary file
