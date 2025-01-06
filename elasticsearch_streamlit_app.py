@@ -1,6 +1,7 @@
 import streamlit as st
 from elasticsearch import Elasticsearch
 import json
+import os
 
 
 # Access Environment Variables from Streamlit Cloud
