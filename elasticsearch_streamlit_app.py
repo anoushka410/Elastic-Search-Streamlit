@@ -1,5 +1,7 @@
 import streamlit as st
 from elasticsearch import Elasticsearch
+import pandas as pd
+import numpy as np
 import json
 
 # Initialize Elasticsearch client
@@ -114,12 +116,52 @@ if __name__ == "__main__":
                 with st.expander(f"📄 {case_details.get('CaseTitle', 'Untitled Case')} (Score: {hit['_score']:.2f})"):
                     # Display basic information
                     st.write(f"**Name of Judgement:** {case_details.get('CaseTitle', 'N/A')}")
-                    st.write(f"**Short Description:** {metadata.get('Summary', 'No description available')}")
+                    short_desc = metadata.get('Summary', 'No description available')
+                    for key, value in short_desc.items():
+                        st.write(f"**{key}:**")
+                        if isinstance(value, dict):
+                            # If the value is a nested dictionary, display it recursively
+                            for sub_key, sub_value in value.items():
+                                st.write(f"  - **{sub_key}:** {sub_value}")
+                        elif isinstance(value, list):
+                            # If the value is a list, display each item
+                            for item in value:
+                                st.write(f"  - {item}")
+                        else:
+                            # If the value is a string or other type, display it directly
+                            st.write(f"  {value}")
+                    # st.write(f"**Short Description:** {metadata.get('Summary', 'No description available')}")
                     
                     # Display keywords
-                    keywords = metadata.get('Keywords', [])
+                    keywords = metadata.get('Tags', [])
+                    
+                    def remove_context_key(dictionary):
+                        """
+                        Recursively removes all occurrences of the "Context" key from a dictionary.
+                        """
+                        if isinstance(dictionary, dict):
+                            # Remove the "Context" key if it exists
+                            dictionary.pop("Context", None)
+                            # Recursively apply to all values in the dictionary
+                            for key, value in dictionary.items():
+                                remove_context_key(value)
+                        elif isinstance(dictionary, list):
+                            # Recursively apply to all items in the list
+                            for item in dictionary:
+                                remove_context_key(item)
+
+                    remove_context_key(keywords)
+                    # keywords_df = pd.DataFrame(keywords)
+
                     if keywords:
-                        st.write("**Keywords:** " + ", ".join(keywords))
+                        # st.write("**Keywords:** " + ", ", keywords)
+                        # Display the data in a table-like format
+                        st.markdown("**Keywords:**")
+                        st.markdown("| Rank | Tag | Score |")
+                        for item in keywords:
+                            st.markdown(f"| {item['Rank']} | {item['Tag']} | {item['Score']} |")
+                        # st.write(f"**Keywords:** {keywords}")
+                        pass
                     else:
                         st.write("**Keywords:** N/A")
                     
@@ -146,8 +188,26 @@ if __name__ == "__main__":
                     # Handle popups for summary and PDF
                     if st.session_state.get(f"show_summary_{hit['_id']}", False):
                         st.subheader("Detailed Summary")
-                        # st.write(metadata.get('FullSummary', 'No detailed summary available'))
-                        st.write(source.get('JudgmentSummary', 'No detailed summary available')['JudgmentName'])
+                        long_summary = source.get('JudgmentSummary', {})
+                        
+                        if long_summary:
+                            for key, value in long_summary.items():
+                                st.write(f"**{key}:**")
+                                if isinstance(value, dict):
+                                    # If the value is a nested dictionary, display it recursively
+                                    for sub_key, sub_value in value.items():
+                                        st.write(f"  - **{sub_key}:** {sub_value}")
+                                elif isinstance(value, list):
+                                    # If the value is a list, display each item
+                                    for item in value:
+                                        st.write(f"  - {item}")
+                                else:
+                                    # If the value is a string or other type, display it directly
+                                    st.write(f"  {value}")
+                        else:
+                            st.write("**Summary:** No description available")
+
+                        # st.write(f"**Summary:** {source.get('JudgmentSummary', 'No description available')}")
                         if st.button("Close", key=f"close_summary_{hit['_id']}"):
                             st.session_state[f"show_summary_{hit['_id']}"] = False
                     
